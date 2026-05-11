@@ -1,0 +1,38 @@
+// Root build file for multi-module Spring Boot microservices project.
+// Each subproject manages its own specific dependencies.
+// This file provides shared configuration and enables framework detection.
+
+plugins {
+    id 'org.springframework.boot' version '3.3.0' apply false
+    id 'io.spring.dependency-management' version '1.1.5' apply false
+    id 'java' apply false
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    // Spring BOM — consistent dependency versions across all subprojects
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:3.3.0"
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+    }
+}
