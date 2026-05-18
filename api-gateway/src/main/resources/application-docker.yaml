@@ -14,23 +14,14 @@ spring:
                     uri: lb://product-service
                     predicates:
                       - Path=/product/swagger-ui/**,/product/swagger-ui.html
-                    filters:
-                      - AddRequestHeader=X-Forwarded-Prefix, /product
-                      - RewritePath=/product/(?<segment>.*), /$\{segment}
                   - id: product-service-openapi
                     uri: lb://product-service
                     predicates:
                       - Path=/product/v3/api-docs/**
-                    filters:
-                      - AddRequestHeader=X-Forwarded-Prefix, /product
-                      - RewritePath=/product/v3/api-docs/(?<segment>.*), /v3/api-docs/$\{segment}
                   - id: product-service-openapi-root
                     uri: lb://product-service
                     predicates:
                       - Path=/product/v3/api-docs
-                    filters:
-                      - AddRequestHeader=X-Forwarded-Prefix, /product
-                      - SetPath=/v3/api-docs
 
                   - id: user-service
                     uri: http://user-service:8080

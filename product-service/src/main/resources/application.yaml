@@ -19,9 +19,8 @@ spring:
 
 server:
   port: 8383
-  forward-headers-strategy: framework
 springdoc:
   swagger-ui:
-    path: /swagger-ui/index.html
+    path: /product/swagger-ui/index.html
   api-docs:
-    path: /v3/api-docs
+    path: /product/v3/api-docs
