@@ -10,6 +10,24 @@ spring:
                       - Path=/api/v1/products/**
                     filters:
                       - StripPrefix=0
+                  - id: product-service-swagger-ui
+                    uri: lb://product-service
+                    predicates:
+                      - Path=/product/swagger-ui/**
+                    filters:
+                      - RewritePath=/product/swagger-ui/(?<segment>.*), /swagger-ui/$\{segment}
+                  - id: product-service-openapi
+                    uri: lb://product-service
+                    predicates:
+                      - Path=/product/v3/api-docs/**
+                    filters:
+                      - RewritePath=/product/v3/api-docs/(?<segment>.*), /v3/api-docs/$\{segment}
+                  - id: product-service-openapi-root
+                    uri: lb://product-service
+                    predicates:
+                      - Path=/product/v3/api-docs
+                    filters:
+                      - SetPath=/v3/api-docs
 
                   - id: user-service
                     uri: http://user-service:8080
