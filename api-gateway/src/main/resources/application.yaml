@@ -10,23 +10,26 @@ spring:
                       - Path=/api/v1/products/**
                     filters:
                       - StripPrefix=0
-                  - id: product-service-swagger-ui-redirect
-                    uri: no://op
+                  - id: product-service-swagger-ui
+                    uri: ${UPSTREAM_BASE_URL:http://localhost:8383}
                     predicates:
-                      - Path=/product/swagger-ui,/product/swagger-ui/,/product/swagger-ui/index.html
+                      - Path=/product/swagger-ui/**,/product/swagger-ui.html
                     filters:
-                      - RedirectTo=302, /swagger-ui/index.html?urls.primaryName=product-service
+                      - AddRequestHeader=X-Forwarded-Prefix, /product
+                      - RewritePath=/product/(?<segment>.*), /$\{segment}
                   - id: product-service-openapi
                     uri: ${UPSTREAM_BASE_URL:http://localhost:8383}
                     predicates:
                       - Path=/product/v3/api-docs/**
                     filters:
+                      - AddRequestHeader=X-Forwarded-Prefix, /product
                       - RewritePath=/product/v3/api-docs/(?<segment>.*), /v3/api-docs/$\{segment}
                   - id: product-service-openapi-root
                     uri: ${UPSTREAM_BASE_URL:http://localhost:8383}
                     predicates:
                       - Path=/product/v3/api-docs
                     filters:
+                      - AddRequestHeader=X-Forwarded-Prefix, /product
                       - SetPath=/v3/api-docs
                   - id: user-service
                     uri: ${USER_SERVICE_URL:http://localhost:8181}
