@@ -42,3 +42,12 @@ spring:
       name: api-gateway
 server:
   port: 8282
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    path: /swagger-ui/index.html
+    disable-swagger-default-url: true
+    urls:
+      - name: product-service
+        url: /product/v3/api-docs
