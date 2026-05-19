@@ -23,6 +23,10 @@ repositories {
     mavenCentral()
 }
 
+ext {
+    set('springCloudVersion', "2025.0.0")
+}
+
 dependencies {
     // Spring Boot Web (MVC + REST)
     implementation 'org.springframework.boot:spring-boot-starter-web'
@@ -30,8 +34,13 @@ dependencies {
     // Spring Data JPA
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
 
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     // Bean Validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
 
     // H2 In-Memory Database (swap with MySQL/PostgreSQL for production)
     runtimeOnly 'com.h2database:h2'
@@ -47,6 +56,12 @@ dependencies {
 
     // swagger
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0'
+}
+
+dependencyManagement {
+    imports {
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+    }
 }
 
 tasks.named('test') {

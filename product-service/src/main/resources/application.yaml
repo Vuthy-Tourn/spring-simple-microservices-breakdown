@@ -1,12 +1,14 @@
 spring:
   application:
-    name: product-api
+    name: product-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
 
   datasource:
-    url: ${DB_HOST:jdbc:postgresql://localhost:5434/mydb}
-    username: ${DB_USERNAME:admin}
-    password: ${DB_PASSWORD:secret123}
-    driver-class-name: org.postgresql.Driver
+    url: ${DB_HOST:${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/mydb}}
+    username: ${DB_USERNAME:${SPRING_DATASOURCE_USERNAME:admin}}
+    password: ${DB_PASSWORD:${SPRING_DATASOURCE_PASSWORD:secret123}}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
 
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -19,8 +21,15 @@ spring:
 
 server:
   port: 8383
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
 springdoc:
   swagger-ui:
-    path: /product/swagger-ui/index.html
+    path: /product/swagger-ui.html
   api-docs:
     path: /product/v3/api-docs

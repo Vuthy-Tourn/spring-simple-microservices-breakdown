@@ -1,8 +1,7 @@
+server:
+  port: ${SERVER_PORT:8282}
+
 spring:
-  application:
-    name: api-gateway
-  config:
-    import: optional:configserver:${CONFIG_SERVER_URL:http://localhost:8888}
   cloud:
     gateway:
       server:
@@ -26,15 +25,6 @@ spring:
               uri: lb://product-service
               predicates:
                 - Path=/product/v3/api-docs
-
-server:
-  port: 8282
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info
 
 springdoc:
   api-docs:

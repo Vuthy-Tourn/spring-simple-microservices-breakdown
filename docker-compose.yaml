@@ -1,27 +1,104 @@
-services: 
-  api-gateway: 
-    build: 
-      context: api-gateway
-    container_name:  api-gateway-cont 
-    environment: 
-      - SERVER_PORT = 8080
-      - SPRING_PROFILES_ACTIVE=docker
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-cont
+    environment:
+      POSTGRES_DB: productdb
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secret123
     ports:
-      - "8080:8080"
-  user-service: 
-    build: 
-      context: user-service 
-    container_name:  user-service-cont 
-    environment: 
-      - SERVER_PORT=8080
+      - "5434:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d productdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  config-server:
+    build:
+      context: ./config-server
+    container_name: config-server-cont
+    environment:
+      SERVER_PORT: 8888
     ports:
-      - "8081:8080"
-  product-service: 
-    build: 
-      context: product-service 
-    container_name:  product-service-cont 
-    environment: 
-      - SERVER_PORT=8080
+      - "8888:8888"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  eureka-server:
+    build:
+      context: ./eureka-server
+    container_name: eureka-server-cont
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      SERVER_PORT: 8761
+    depends_on:
+      config-server:
+        condition: service_healthy
     ports:
-      - "8082:8080"
- 
+      - "8761:8761"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  product-service:
+    build:
+      context: ./product-service
+    container_name: product-service-cont
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      SERVER_PORT: 8383
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/productdb
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: secret123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8383:8383"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8383/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api-gateway-cont
+    environment:
+      CONFIG_SERVER_URL: http://config-server:8888
+      EUREKA_SERVER_URL: http://eureka-server:8761/eureka
+      SERVER_PORT: 8282
+      SPRING_PROFILES_ACTIVE: docker
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      product-service:
+        condition: service_healthy
+    ports:
+      - "8282:8282"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://localhost:8282/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+volumes:
+  postgres-data:

@@ -1,48 +1,5 @@
 spring:
-    cloud:
-        gateway:
-          server:
-              webflux:
-                routes:
-                  - id: product-service
-                    uri: lb://product-service
-                    predicates:
-                      - Path=/api/v1/products/**
-                    filters:
-                      - StripPrefix=0
-                  - id: product-service-swagger-ui
-                    uri: lb://product-service
-                    predicates:
-                      - Path=/product/swagger-ui/**,/product/swagger-ui.html
-                  - id: product-service-openapi
-                    uri: lb://product-service
-                    predicates:
-                      - Path=/product/v3/api-docs/**
-                  - id: product-service-openapi-root
-                    uri: lb://product-service
-                    predicates:
-                      - Path=/product/v3/api-docs
-
-                  - id: user-service
-                    uri: http://user-service:8080
-                    predicates:
-                      #- Path=/api/v1/users/**
-                      # because I want to override the path
-                      - Path=/users/**
-                    filters:
-                      #- StripPrefix=0
-                      - RewritePath=/users/(?<segment>.*), /api/v1/users/$\{segment}
-    application:
-      name: api-gateway
-server:
-  port: 8282
-springdoc:
-  api-docs:
-    enabled: false
-  swagger-ui:
-    path: /swagger-ui/index.html
-    disable-swagger-default-url: true
-    urlsPrimaryName: product-service
-    urls:
-      - name: product-service
-        url: /product/v3/api-docs
+  config:
+    activate:
+      on-profile: docker
+    import: optional:configserver:${CONFIG_SERVER_URL:http://config-server:8888}

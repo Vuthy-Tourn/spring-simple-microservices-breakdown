@@ -15,11 +15,15 @@ RUN gradle build --no-daemon -x test
 FROM eclipse-temurin:21-jdk
 WORKDIR /app
 
+RUN apt-get update \
+    && apt-get install -y curl \
+    && rm -rf /var/lib/apt/lists/*
+
 # Copy the built JAR file from the builder stage
 COPY --from=builder /app/build/libs/*.jar app.jar
 
 # Expose the application's port
-EXPOSE 8082
+EXPOSE 8383
 
 # Run the application
 ENTRYPOINT ["java", "-jar", "app.jar"]
